@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>速读 · __论文标题__</title>
+<style>
+  :root{
+    --bg:#eceef1; --panel:#fff; --ink:#1c2127; --sub:#5b6470;
+    --line:#e2e6eb; --accent:#2b6cb0; --accent-soft:#eaf2fb;
+    --fig:#fff8ec; --fig-line:#f0dcb8; --hl:#fff3cd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       color:var(--ink);background:var(--bg);overflow:hidden;line-height:1.55}
+  /* ---- 右栏头部（原顶部 header 移入右侧栏开头） ---- */
+  #guide-head{padding:14px 16px 0}
+  #guide-head h1{font-size:18px;font-weight:700;line-height:1.4}
+  #guide-head .en{font-size:13px;color:var(--sub);font-weight:400;margin-top:2px}
+  #guide-head .meta{font-size:12px;color:var(--sub);margin-top:4px}
+  #guide-head .meta a{color:var(--accent);text-decoration:none}
+  .nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;
+       position:sticky;top:0;z-index:5;background:#f6f7f9;padding:8px 16px 9px;
+       border-bottom:1px solid var(--line);box-shadow:0 2px 5px rgba(0,0,0,.04)}
+  .chip{font-size:13px;padding:3px 11px;border:1px solid var(--line);border-radius:14px;
+        background:#fafbfc;color:var(--sub);cursor:pointer;user-select:none}
+  .chip:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+  .pageind{margin-left:auto;font-size:13px;color:var(--sub)}
+  /* ---- main split ---- */
+  main{display:flex;height:100vh}
+  #pdf-pane{width:55%;overflow-y:auto;background:var(--bg);padding:14px 0;text-align:center}
+  #pdf-pane .pg{margin:0 auto 14px;box-shadow:0 1px 6px rgba(0,0,0,.16);background:#fff;
+                position:relative;display:inline-block;width:96%}
+  #pdf-pane canvas{display:block;width:100%;height:auto;border-radius:2px}
+  #pdf-pane .pgnum{position:absolute;top:6px;left:6px;font-size:10px;color:#fff;
+                   background:rgba(0,0,0,.45);padding:1px 6px;border-radius:8px}
+  #resizer{width:6px;cursor:col-resize;background:linear-gradient(var(--line),var(--line));
+           flex:0 0 6px}
+  #resizer:hover{background:var(--accent)}
+  #guide-pane{flex:1;overflow-y:auto;background:#f6f7f9}
+  #guide-body{padding:6px 16px 80px}
+  /* ---- guide cards ---- */
+  .sec-h{font-size:16px;font-weight:700;color:var(--accent);margin:22px 0 10px;
+         padding-bottom:5px;border-bottom:2px solid var(--accent-soft);display:flex;align-items:center;gap:7px}
+  .sec-h:first-child{margin-top:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+        padding:11px 13px;margin-bottom:11px;position:relative}
+  .card.fig{background:var(--fig);border-color:var(--fig-line)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px}
+  .card .t{font-size:15.5px;font-weight:600;color:var(--ink)}
+  .card.fig .t::before{content:"📊 ";}
+  .badge{flex:0 0 auto;font-size:12px;font-weight:600;color:#fff;background:var(--accent);
+         padding:2px 8px;border-radius:10px;cursor:pointer;white-space:nowrap;text-decoration:none}
+  .badge:hover{background:#1f4e7a}
+  .card p{font-size:15px;color:#2b3138;margin:3px 0}
+  .card ul{margin:5px 0 0;padding-left:2px;list-style:none}
+  .card li{font-size:15px;color:#2b3138;margin:6px 0;padding-left:16px;position:relative}
+  .card li::before{content:"";position:absolute;left:3px;top:10px;width:5px;height:5px;
+                   border-radius:50%;background:var(--accent)}
+  .card li .k{font-weight:600;color:var(--accent);margin-right:4px}
+  .lead{font-size:15.5px;color:#2b3138;line-height:1.65}
+  .lead b{color:var(--accent)}
+  /* 词汇卡 */
+  .card.terms{background:#f1f8f3;border-color:#cfe6d3}
+  .card li.term{padding-left:0;margin:11px 0}
+  .card li.term::before{display:none}
+  .tn{display:block;font-weight:700;color:#217a4b;font-size:1.03em;margin-bottom:2px}
+  /* 英文对照段落 */
+  .en-text{display:block;font-size:13px;color:var(--sub);font-style:italic;margin-top:5px;line-height:1.55;border-left:2px solid var(--line);padding-left:7px}
+  .hide-en .en-text{display:none}
+  .flash{animation:fl 1.4s ease}
+  @keyframes fl{0%,40%{background:var(--hl)}100%{}}
+  /* loading */
+  #load{position:absolute;left:0;right:55%;top:0;bottom:0;display:flex;align-items:center;
+        justify-content:center;flex-direction:column;gap:10px;color:var(--sub);font-size:13px;background:var(--bg)}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);
+        border-radius:50%;animation:sp 0.8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main>
+  <div id="pdf-pane"><div id="load"><div class="spin"></div><div>正在渲染 PDF…</div></div></div>
+  <div id="resizer"></div>
+  <div id="guide-pane">
+    <div id="guide-head">
+      <h1>__中文标题：一句话概括论文主旨__</h1>
+      <div class="en">__英文原标题__</div>
+      <div class="meta">__作者 et al. · 期刊 卷,页 · 年-月-日 · 机构 · <a href="__DOI_URL__" target="_blank">doi:__DOI__</a>__</div>
+    </div>
+    <div class="nav" id="nav"><span class="pageind" id="pageind">PDF 加载中…</span><span class="chip" id="en-toggle" title="显示/隐藏英文对照">EN 隐藏</span><span class="chip" id="fzminus" title="缩小讲解字号">A−</span><span class="chip" id="fzplus" title="放大讲解字号">A+</span></div>
+    <div id="guide-body"></div>
+  </div>
+</main>
+
+<script src="./vendor/pdf.min.js"></script>
+<script src="./assets/paper-data.js"></script>
+<script src="./vendor/pdf.worker.inline.js"></script>
+<script>
+/* ============ 中文速读讲解（精读后人工撰写） ============ */
+const SECTIONS = [
+ // ===== 在此填入本论文的双语速读讲解（Claude 精读后撰写） =====
+ // 每个 section = {name:”区名”, items:[...]}；item.kind ∈ 'terms' | 'lead' | 'card' | 'fig'
+ //  terms 开篇核心词汇卡（绿底）: {kind:”terms”, page, t:”分组名”, points:[[术语名（中英）, 中文解释, 英文改写?], ...]}
+ //  lead  一句话核心            : {kind:”lead”,  page, html:`中文 HTML`, en_html:`英文改写 HTML`（可选）}
+ //  card  普通段落讲解          : {kind:”card”,  page, t:”标题”, points:[[小标签, 中文说明, 英文改写?], ...]}
+ //  fig   图表讲解（黄底📊）     : {kind:”fig”,   page, t:”图N”, points:[[panel如”A 分图”, 中文讲解, 英文改写?], ...]}
+ //  第三列（英文改写）= 用论文原文表达风格重写，非逐字翻译；省略则不显示英文段落
+ //  page = 该内容对应的 PDF 物理页码（点右上角 📄P# 跳到左侧该页）
+ //  ⚠️ 内容里的引号一律用中文「」或弯引号 “” —— 禁用英文直双引号，否则会截断 JS 字符串
+ {name:”🔑 核心词汇（读前必看）”, items:[
+   {kind:”terms”, page:1, t:”方法与工具”, points:[
+     [“术语名（English）”,”一句话把这个术语讲清楚，通俗、具体。”,”One-sentence explanation in the paper's own voice.”]]},
+ ]},
+ {name:”📌 一句话核心 & 封面”, items:[
+   {kind:”lead”, page:1, html:`本文一句话核心，可用 <b>加粗</b> 强调关键词。`, en_html:`Core finding restated in the paper's style, with <b>key terms</b> emphasized.`},
+ ]},
+ // …… 继续按 摘要/引言/结果各部分/讨论/方法 补充 section、逐图一张 fig 卡 ……
+];
+
+/* ============ 渲染右侧讲解 ============ */
+const guide = document.getElementById('guide-body');
+const nav = document.getElementById('nav');
+SECTIONS.forEach((sec, si)=>{
+  const h = document.createElement('div');
+  h.className='sec-h'; h.id='sec-'+si; h.textContent=sec.name;
+  guide.appendChild(h);
+  // nav chip
+  const chip=document.createElement('span');
+  chip.className='chip'; chip.textContent=sec.name.replace(/^[^ ]+ /,'').slice(0,8);
+  chip.onclick=()=>h.scrollIntoView({behavior:'smooth',block:'start'});
+  nav.insertBefore(chip, nav.firstChild);
+  sec.items.forEach(it=>{
+    const c=document.createElement('div');
+    c.className='card'+(it.kind==='fig'?' fig':'')+(it.kind==='terms'?' terms':'');
+    if(it.kind==='lead'){ c.className='card'; c.innerHTML=`<div class="top"><div class="t">核心一句话</div><a class="badge" data-pg="${it.page}">📄 P${it.page}</a></div><div class="lead">${it.html}${it.en_html?`<span class="en-text">${it.en_html}</span>`:''}</div>`; }
+    else{
+      let inner=`<div class="top"><div class="t">${it.t}</div><a class="badge" data-pg="${it.page}">📄 P${it.page}</a></div>`;
+      inner+='<ul>'+it.points.map(p=> it.kind==='terms'
+        ? `<li class="term"><span class="tn">${p[0]}</span>${p[1]}${p[2]?`<span class="en-text">${p[2]}</span>`:''}</li>`
+        : `<li><span class="k">${p[0]}</span>${p[1]}${p[2]?`<span class="en-text">${p[2]}</span>`:''}</li>`).join('')+'</ul>';
+      c.innerHTML=inner;
+    }
+    guide.appendChild(c);
+  });
+});
+// 页码徽章 → 跳转左侧 PDF
+guide.addEventListener('click', e=>{
+  const b=e.target.closest('.badge'); if(!b) return;
+  const n=b.dataset.pg; const el=document.getElementById('pg-'+n);
+  if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+});
+
+/* ============ 渲染 PDF（PDF.js，本地、离线） ============ */
+const pane=document.getElementById('pdf-pane');
+const pageind=document.getElementById('pageind');
+let pdfDoc=null, pageEls=[];
+
+function b64ToBytes(b64){
+  const bin=atob(b64); const len=bin.length; const bytes=new Uint8Array(len);
+  for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+
+async function renderAll(){
+  // file:// 下用 blob URL 创建同源 worker（绕开本地 worker 安全限制）
+  const wblob=new Blob([window.PDF_WORKER_CODE],{type:'application/javascript'});
+  pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wblob);
+  const bytes=b64ToBytes(window.PDF_B64);
+  pdfDoc=await pdfjsLib.getDocument({data:bytes}).promise;
+  document.getElementById('load')?.remove();
+  pane.innerHTML='';
+  pageEls=[];
+  const dpr=Math.min(window.devicePixelRatio||1, 2.5);
+  const paneW=pane.clientWidth*0.96-2;
+  for(let n=1;n<=pdfDoc.numPages;n++){
+    const page=await pdfDoc.getPage(n);
+    const base=page.getViewport({scale:1});
+    const scale=paneW/base.width;
+    const vp=page.getViewport({scale});
+    const wrap=document.createElement('div'); wrap.className='pg'; wrap.id='pg-'+n;
+    const cv=document.createElement('canvas');
+    cv.width=Math.floor(vp.width*dpr); cv.height=Math.floor(vp.height*dpr);
+    const tag=document.createElement('div'); tag.className='pgnum'; tag.textContent='P'+n;
+    wrap.appendChild(cv); wrap.appendChild(tag); pane.appendChild(wrap);
+    pageEls.push(wrap);
+    await page.render({canvasContext:cv.getContext('2d'), viewport:vp,
+                       transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;
+    pageind.textContent=`第 ${n}/${pdfDoc.numPages} 页`;
+  }
+  pageind.textContent=`共 ${pdfDoc.numPages} 页 · 点右侧 📄P# 跳转`;
+  trackPage();
+}
+// 滚动时更新"当前页"
+function trackPage(){
+  pane.addEventListener('scroll', ()=>{
+    const mid=pane.scrollTop+pane.clientHeight*0.35;
+    let cur=1;
+    for(let i=0;i<pageEls.length;i++){ if(pageEls[i].offsetTop<=mid) cur=i+1; }
+    pageind.textContent=`第 ${cur}/${pdfDoc.numPages} 页`;
+  });
+}
+renderAll().catch(err=>{
+  const l=document.getElementById('load');
+  if(l) l.innerHTML='<div style="color:#b00;font-size:13px;padding:20px;text-align:center">PDF 渲染失败：'+err.message+'<br><br>请用 Chrome 打开本文件夹下的 index.html。</div>';
+  console.error(err);
+});
+
+/* ============ 可拖动分隔条 ============ */
+const rz=document.getElementById('resizer');
+let drag=false;
+rz.addEventListener('mousedown',()=>{drag=true;document.body.style.userSelect='none';});
+window.addEventListener('mouseup',()=>{
+  if(drag){drag=false;document.body.style.userSelect='';
+    clearTimeout(window._rt); window._rt=setTimeout(renderAll,150);} // 重渲染保清晰
+});
+window.addEventListener('mousemove',e=>{
+  if(!drag) return;
+  const pct=Math.min(75,Math.max(30, e.clientX/window.innerWidth*100));
+  document.getElementById('pdf-pane').style.width=pct+'%';
+});
+
+/* ============ EN 显示/隐藏 toggle ============ */
+(function(){
+  let visible=true;
+  const btn=document.getElementById('en-toggle');
+  btn.onclick=()=>{
+    visible=!visible;
+    document.body.classList.toggle('hide-en',!visible);
+    btn.textContent=visible?'EN 隐藏':'EN 显示';
+  };
+})();
+
+/* ============ 讲解区字号缩放（A− / A+，本地记忆） ============ */
+(function(){
+  const gp=document.getElementById('guide-body');
+  let z=parseFloat(localStorage.getItem('paperGZ')||'1');
+  const apply=()=>{gp.style.zoom=z; localStorage.setItem('paperGZ',z);};
+  apply();
+  document.getElementById('fzminus').onclick=()=>{z=Math.max(0.8,Math.round((z-0.1)*10)/10);apply();};
+  document.getElementById('fzplus').onclick=()=>{z=Math.min(1.7,Math.round((z+0.1)*10)/10);apply();};
+})();
+</script>
+</body>
+</html>
