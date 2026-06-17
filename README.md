@@ -9,6 +9,7 @@ Claude Code 技能库 / Claude Code Skills Collection
 | 技能 | 功能描述 | 状态 |
 |------|----------|------|
 | [双语阅读论文](skills/双语阅读论文) <br>(bilingual-paper-reader) | 把论文 PDF 生成自包含本地双语速读网页：左侧 PDF 原文、右侧中文极简讲解+英文对照，顶部 toggle 一键显隐英文，Chrome 双击即用无需联网 | ✅ ready |
+| [论文下载](skills/论文下载) <br>(paper-downloader) | 批量下载学术论文 PDF：9 层下载策略 + Sci-Hub curl 兜底 + Cell.com Playwright，按 DOI 列表自动下载，生成失败清单 `_需手动下载.md` | ✅ ready |
 
 ## 安装使用
 
